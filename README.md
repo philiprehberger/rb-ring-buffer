@@ -15,7 +15,7 @@ Fixed-size circular buffer with overflow, statistics, and enumeration
 Add to your Gemfile:
 
 ```ruby
-gem 'philiprehberger-ring_buffer'
+gem "philiprehberger-ring_buffer"
 ```
 
 Or install directly:

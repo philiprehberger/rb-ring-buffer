@@ -27,7 +27,7 @@ gem install philiprehberger-ring_buffer
 ## Usage
 
 ```ruby
-require 'philiprehberger/ring_buffer'
+require "philiprehberger/ring_buffer"
 
 buf = Philiprehberger::RingBuffer.new(3)
 buf.push(1)
@@ -87,8 +87,8 @@ buf.select(&:odd?)        # => [1, 3]
 
 ```bash
 bundle install
-bundle exec rspec      # Run tests
-bundle exec rubocop    # Check code style
+bundle exec rspec
+bundle exec rubocop
 ```
 
 ## License

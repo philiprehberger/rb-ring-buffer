@@ -116,8 +116,8 @@ module Philiprehberger
     # Iterate over elements (oldest first)
     #
     # @yield [element]
-    def each(&block)
-      to_a.each(&block)
+    def each(&)
+      to_a.each(&)
     end
   end
 end

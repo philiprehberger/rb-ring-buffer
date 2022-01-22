@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = 'Fixed-size circular buffer with overflow, statistics, and enumeration'
   spec.description = 'Fixed-capacity ring buffer that overwrites oldest entries on overflow, ' \
-                       'with built-in statistics (average, sum, min, max), last-n retrieval, and Enumerable support.'
+                     'with built-in statistics (average, sum, min, max), last-n retrieval, and Enumerable support.'
   spec.homepage = 'https://philiprehberger.com/open-source-packages/ruby/philiprehberger-ring_buffer'
   spec.license = 'MIT'
 

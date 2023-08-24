@@ -7,6 +7,16 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-09
+
+### Added
+- `#shift` removes and returns the oldest element
+- `#pop` removes and returns the newest element
+- `#oldest` and `#newest` peek without mutating
+
+### Changed
+- Internal `to_a` now derives the start index from `@head` and `@count`, supporting consumption via `shift`/`pop` while preserving all existing semantics
+
 ## [0.2.0] - 2026-04-03
 
 ### Added
@@ -57,3 +67,13 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Statistics: average, sum, min, max
 - Last-n element retrieval
 - Enumerable support
+
+[0.3.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.3.0
+[0.2.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.2.0
+[0.1.6]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.6
+[0.1.5]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.5
+[0.1.4]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.4
+[0.1.3]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.3
+[0.1.2]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.2
+[0.1.1]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.1
+[0.1.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.0

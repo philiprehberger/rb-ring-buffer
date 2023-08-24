@@ -39,12 +39,53 @@ module Philiprehberger
     def to_a
       return [] if @count.zero?
 
-      if @count < @capacity
-        @buffer[0...@count]
-      else
-        start = @head
-        Array.new(@capacity) { |i| @buffer[(start + i) % @capacity] }
-      end
+      start = (@head - @count) % @capacity
+      Array.new(@count) { |i| @buffer[(start + i) % @capacity] }
+    end
+
+    # Remove and return the oldest element
+    #
+    # @return [Object, nil]
+    def shift
+      return nil if empty?
+
+      start = (@head - @count) % @capacity
+      value = @buffer[start]
+      @buffer[start] = nil
+      @count -= 1
+      value
+    end
+
+    # Remove and return the newest element
+    #
+    # @return [Object, nil]
+    def pop
+      return nil if empty?
+
+      newest_idx = (@head - 1) % @capacity
+      value = @buffer[newest_idx]
+      @buffer[newest_idx] = nil
+      @head = newest_idx
+      @count -= 1
+      value
+    end
+
+    # Return the oldest element without removing it
+    #
+    # @return [Object, nil]
+    def oldest
+      return nil if empty?
+
+      @buffer[(@head - @count) % @capacity]
+    end
+
+    # Return the newest element without removing it
+    #
+    # @return [Object, nil]
+    def newest
+      return nil if empty?
+
+      @buffer[(@head - 1) % @capacity]
     end
 
     # Number of elements currently in the buffer

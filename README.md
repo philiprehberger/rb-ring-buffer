@@ -70,6 +70,24 @@ buf.size   # => 0
 buf.empty? # => true
 ```
 
+### Consuming Elements
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(3)
+[1, 2, 3].each { |v| buf.push(v) }
+
+buf.shift    # => 1   (removes oldest)
+buf.pop      # => 3   (removes newest)
+buf.to_a     # => [2]
+
+buf.push(4)
+buf.push(5)
+buf.oldest   # => 2   (peek, no mutation)
+buf.newest   # => 5
+```
+
+`shift`, `pop`, `oldest`, and `newest` all return `nil` when the buffer is empty.
+
 ### Statistics
 
 ```ruby
@@ -100,6 +118,10 @@ buf.select(&:odd?)        # => [1, 3]
 |--------|-------------|
 | `RingBuffer.new(capacity)` | Create a buffer with fixed capacity |
 | `#push(value)` | Add a value, overwriting oldest if full |
+| `#shift` | Remove and return the oldest element (or `nil`) |
+| `#pop` | Remove and return the newest element (or `nil`) |
+| `#oldest` | Peek the oldest element without removing (or `nil`) |
+| `#newest` | Peek the newest element without removing (or `nil`) |
 | `#[](index)` | Access by index (0 = oldest, -1 = newest) |
 | `#to_a` | Convert to array (oldest first) |
 | `#size` | Number of elements in the buffer |

@@ -389,4 +389,86 @@ RSpec.describe Philiprehberger::RingBuffer do
       expect(buf.select(&:even?)).to eq([2, 4])
     end
   end
+
+  describe '#shift' do
+    it 'returns nil when empty' do
+      expect(described_class.new(3).shift).to be_nil
+    end
+
+    it 'removes and returns the oldest element' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect(buf.shift).to eq(1)
+      expect(buf.size).to eq(2)
+      expect(buf.to_a).to eq([2, 3])
+    end
+
+    it 'returns the correct element after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      # buffer now holds [3, 4, 5]
+      expect(buf.shift).to eq(3)
+      expect(buf.to_a).to eq([4, 5])
+    end
+  end
+
+  describe '#pop' do
+    it 'returns nil when empty' do
+      expect(described_class.new(3).pop).to be_nil
+    end
+
+    it 'removes and returns the newest element' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect(buf.pop).to eq(3)
+      expect(buf.size).to eq(2)
+      expect(buf.to_a).to eq([1, 2])
+    end
+
+    it 'preserves order across pop then push' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      buf.pop
+      buf.push(99)
+      expect(buf.to_a).to eq([1, 2, 99])
+    end
+  end
+
+  describe '#oldest and #newest' do
+    it 'return nil when empty' do
+      buf = described_class.new(3)
+      expect(buf.oldest).to be_nil
+      expect(buf.newest).to be_nil
+    end
+
+    it 'return the oldest and newest without mutating' do
+      buf = described_class.new(3)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf.oldest).to eq(10)
+      expect(buf.newest).to eq(30)
+      expect(buf.size).to eq(3)
+    end
+
+    it 'reflect wrap-around correctly' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf.oldest).to eq(3)
+      expect(buf.newest).to eq(5)
+    end
+  end
+
+  describe 'mixed mutation' do
+    it 'keeps to_a consistent across push/shift/pop sequences' do
+      buf = described_class.new(4)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) } # [2, 3, 4, 5]
+      expect(buf.shift).to eq(2)                  # [3, 4, 5]
+      expect(buf.pop).to eq(5)                    # [3, 4]
+      buf.push(6)                                 # [3, 4, 6]
+      buf.push(7)                                 # [3, 4, 6, 7]
+      buf.push(8)                                 # [4, 6, 7, 8]
+      expect(buf.to_a).to eq([4, 6, 7, 8])
+      expect(buf.oldest).to eq(4)
+      expect(buf.newest).to eq(8)
+    end
+  end
 end

@@ -103,6 +103,20 @@ buf.stddev    # => 8.16496580927726
 buf.median    # => 20.0
 ```
 
+### Resize
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(3)
+[1, 2, 3].each { |v| buf.push(v) }
+
+buf.resize(5)
+buf.capacity     # => 5
+buf.to_a         # => [1, 2, 3]
+
+buf.resize(2)
+buf.to_a         # => [2, 3] (keeps most recent)
+```
+
 ### Enumerable
 
 ```ruby
@@ -130,6 +144,8 @@ buf.select(&:odd?)        # => [1, 3]
 | `#first(n)` | First n elements (oldest) |
 | `#last(n)` | Last n elements (most recent) |
 | `#clear` | Remove all elements, reset state |
+| `#resize(new_capacity)` | Change buffer capacity, keeping most recent elements |
+| `#inspect` | Human-readable string representation |
 | `#average` | Average of numeric elements |
 | `#sum` | Sum of numeric elements |
 | `#min` | Minimum element |

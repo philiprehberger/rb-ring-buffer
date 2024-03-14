@@ -457,6 +457,93 @@ RSpec.describe Philiprehberger::RingBuffer do
     end
   end
 
+  describe '#resize' do
+    it 'grows the buffer preserving all elements' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      buf.resize(5)
+      expect(buf.capacity).to eq(5)
+      expect(buf.to_a).to eq([1, 2, 3])
+      expect(buf.size).to eq(3)
+      expect(buf.full?).to be false
+    end
+
+    it 'shrinks the buffer keeping most recent elements' do
+      buf = described_class.new(5)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      buf.resize(3)
+      expect(buf.capacity).to eq(3)
+      expect(buf.to_a).to eq([3, 4, 5])
+      expect(buf.size).to eq(3)
+      expect(buf.full?).to be true
+    end
+
+    it 'is a no-op when capacity is unchanged' do
+      buf = described_class.new(3)
+      [1, 2].each { |v| buf.push(v) }
+      buf.resize(3)
+      expect(buf.to_a).to eq([1, 2])
+      expect(buf.capacity).to eq(3)
+    end
+
+    it 'raises on non-positive capacity' do
+      buf = described_class.new(3)
+      expect { buf.resize(0) }.to raise_error(described_class::Error)
+      expect { buf.resize(-1) }.to raise_error(described_class::Error)
+      expect { buf.resize('a') }.to raise_error(described_class::Error)
+    end
+
+    it 'works on an empty buffer' do
+      buf = described_class.new(3)
+      buf.resize(5)
+      expect(buf.capacity).to eq(5)
+      expect(buf.to_a).to eq([])
+      expect(buf.empty?).to be true
+    end
+
+    it 'allows push/pop/shift after resize' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      buf.resize(5)
+      buf.push(4)
+      buf.push(5)
+      expect(buf.to_a).to eq([1, 2, 3, 4, 5])
+      expect(buf.shift).to eq(1)
+      expect(buf.pop).to eq(5)
+      expect(buf.to_a).to eq([2, 3, 4])
+    end
+
+    it 'returns self for chaining' do
+      buf = described_class.new(3)
+      expect(buf.resize(5)).to be(buf)
+    end
+
+    it 'handles wrap-around before resize' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) } # [3, 4, 5]
+      buf.resize(5)
+      expect(buf.to_a).to eq([3, 4, 5])
+      expect(buf.capacity).to eq(5)
+    end
+  end
+
+  describe '#inspect' do
+    it 'returns a human-readable string' do
+      buf = described_class.new(3)
+      [1, 2].each { |v| buf.push(v) }
+      result = buf.inspect
+      expect(result).to include('capacity=3')
+      expect(result).to include('size=2')
+      expect(result).to include('[1, 2]')
+    end
+
+    it 'shows empty buffer correctly' do
+      buf = described_class.new(5)
+      expect(buf.inspect).to include('size=0')
+      expect(buf.inspect).to include('elements=[]')
+    end
+  end
+
   describe 'mixed mutation' do
     it 'keeps to_a consistent across push/shift/pop sequences' do
       buf = described_class.new(4)

@@ -244,6 +244,49 @@ module Philiprehberger
       self
     end
 
+    # Push multiple values at once
+    #
+    # @param values [Array<Object>] values to push
+    # @return [self]
+    def concat(*values)
+      values.each { |v| push(v) }
+      self
+    end
+
+    # Calculate the p-th percentile of numeric elements
+    #
+    # Uses linear interpolation between nearest ranks.
+    #
+    # @param p [Numeric] percentile (0-100)
+    # @return [Float, nil] the percentile value, or nil if empty
+    # @raise [Error] if p is outside 0-100
+    def percentile(p)
+      raise Error, 'percentile must be between 0 and 100' unless p.is_a?(Numeric) && p >= 0 && p <= 100
+      return nil if empty?
+
+      sorted = to_a.sort
+      return sorted.first.to_f if sorted.length == 1
+
+      rank = (p / 100.0) * (sorted.length - 1)
+      lower = rank.floor
+      upper = rank.ceil
+      return sorted[lower].to_f if lower == upper
+
+      sorted[lower] + ((sorted[upper] - sorted[lower]) * (rank - lower))
+    end
+
+    # Return a random element or array of random elements
+    #
+    # @param n [Integer, nil] number of elements (nil for single element)
+    # @return [Object, Array, nil]
+    def sample(n = nil)
+      arr = to_a
+      return nil if arr.empty? && n.nil?
+      return [] if arr.empty? && n
+
+      n.nil? ? arr.sample : arr.sample(n)
+    end
+
     # Human-readable string representation
     #
     # @return [String]

@@ -655,6 +655,135 @@ RSpec.describe Philiprehberger::RingBuffer do
     end
   end
 
+  describe '#moving_average' do
+    it 'calculates sliding window averages' do
+      buf = described_class.new(5)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf.moving_average(window: 3)).to eq([2.0, 3.0, 4.0])
+    end
+
+    it 'returns single average when window equals size' do
+      buf = described_class.new(3)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf.moving_average(window: 3)).to eq([20.0])
+    end
+
+    it 'returns per-element averages when window is 1' do
+      buf = described_class.new(4)
+      [2, 4, 6, 8].each { |v| buf.push(v) }
+      expect(buf.moving_average(window: 1)).to eq([2.0, 4.0, 6.0, 8.0])
+    end
+
+    it 'works with floats' do
+      buf = described_class.new(3)
+      [1.5, 2.5, 3.5].each { |v| buf.push(v) }
+      expect(buf.moving_average(window: 2)).to eq([2.0, 3.0])
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf.moving_average(window: 2)).to eq([3.5, 4.5])
+    end
+
+    it 'raises when window exceeds size' do
+      buf = described_class.new(5)
+      [1, 2].each { |v| buf.push(v) }
+      expect { buf.moving_average(window: 3) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for empty buffer' do
+      expect { described_class.new(3).moving_average(window: 1) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for non-numeric elements' do
+      buf = described_class.new(3)
+      %w[a b c].each { |v| buf.push(v) }
+      expect { buf.moving_average(window: 2) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for non-positive window' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect { buf.moving_average(window: 0) }.to raise_error(described_class::Error)
+      expect { buf.moving_average(window: -1) }.to raise_error(described_class::Error)
+    end
+  end
+
+  describe '#ema' do
+    it 'calculates exponential moving average' do
+      buf = described_class.new(5)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      result = buf.ema(alpha: 0.5)
+      # EMA: 1.0 -> 0.5*2+0.5*1=1.5 -> 0.5*3+0.5*1.5=2.25 -> 0.5*4+0.5*2.25=3.125 -> 0.5*5+0.5*3.125=4.0625
+      expect(result).to be_within(0.0001).of(4.0625)
+    end
+
+    it 'returns the single element when buffer has one element' do
+      buf = described_class.new(5)
+      buf.push(42)
+      expect(buf.ema(alpha: 0.5)).to eq(42.0)
+    end
+
+    it 'returns the last value when alpha is 1.0' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf.ema(alpha: 1.0)).to eq(30.0)
+    end
+
+    it 'weights older values more heavily with small alpha' do
+      buf = described_class.new(3)
+      [100, 0, 0].each { |v| buf.push(v) }
+      result = buf.ema(alpha: 0.1)
+      # 100.0 -> 0.1*0+0.9*100=90.0 -> 0.1*0+0.9*90=81.0
+      expect(result).to be_within(0.0001).of(81.0)
+    end
+
+    it 'works with floats' do
+      buf = described_class.new(3)
+      [1.0, 2.0, 3.0].each { |v| buf.push(v) }
+      result = buf.ema(alpha: 0.5)
+      # 1.0 -> 1.5 -> 2.25
+      expect(result).to be_within(0.0001).of(2.25)
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 10, 20, 30].each { |v| buf.push(v) }
+      result = buf.ema(alpha: 0.5)
+      # elements: [10, 20, 30] -> 10.0 -> 15.0 -> 22.5
+      expect(result).to be_within(0.0001).of(22.5)
+    end
+
+    it 'raises for empty buffer' do
+      expect { described_class.new(3).ema(alpha: 0.5) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for alpha of 0' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect { buf.ema(alpha: 0) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for alpha greater than 1' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect { buf.ema(alpha: 1.5) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for negative alpha' do
+      buf = described_class.new(3)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect { buf.ema(alpha: -0.5) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for non-numeric elements' do
+      buf = described_class.new(3)
+      %w[a b c].each { |v| buf.push(v) }
+      expect { buf.ema(alpha: 0.5) }.to raise_error(described_class::Error)
+    end
+  end
+
   describe 'mixed mutation' do
     it 'keeps to_a consistent across push/shift/pop sequences' do
       buf = described_class.new(4)

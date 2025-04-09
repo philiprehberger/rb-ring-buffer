@@ -287,6 +287,41 @@ module Philiprehberger
       n.nil? ? arr.sample : arr.sample(n)
     end
 
+    # Sliding window averages over elements oldest to newest
+    #
+    # @param window [Integer] window size
+    # @return [Array<Float>]
+    def moving_average(window:)
+      raise Error, 'buffer is empty' if empty?
+      raise Error, 'window must be a positive integer' unless window.is_a?(Integer) && window.positive?
+      raise Error, 'window exceeds buffer size' if window > @count
+
+      arr = to_a
+      arr.each { |v| raise Error, 'all elements must be numeric' unless v.is_a?(Numeric) }
+
+      (0..arr.length - window).map do |i|
+        arr[i, window].sum.to_f / window
+      end
+    end
+
+    # Exponential moving average
+    #
+    # @param alpha [Float] smoothing factor (0 < alpha <= 1)
+    # @return [Float]
+    def ema(alpha:)
+      raise Error, 'buffer is empty' if empty?
+      raise Error, 'alpha must be between 0 (exclusive) and 1 (inclusive)' unless alpha.is_a?(Numeric) && alpha > 0 && alpha <= 1
+
+      arr = to_a
+      arr.each { |v| raise Error, 'all elements must be numeric' unless v.is_a?(Numeric) }
+
+      result = arr.first.to_f
+      arr.drop(1).each do |v|
+        result = alpha * v + (1 - alpha) * result
+      end
+      result
+    end
+
     # Human-readable string representation
     #
     # @return [String]

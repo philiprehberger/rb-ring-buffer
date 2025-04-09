@@ -7,6 +7,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-04-15
+
+### Added
+- `#moving_average(window:)` for sliding window averages over buffer elements
+- `#ema(alpha:)` for exponential moving average calculation
+
 ## [0.5.0] - 2026-04-14
 
 ### Added
@@ -85,6 +91,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Last-n element retrieval
 - Enumerable support
 
+[0.6.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.6.0
 [0.5.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.3.0

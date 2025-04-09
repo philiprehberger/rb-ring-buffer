@@ -137,6 +137,16 @@ buf.percentile(75)   # => 75.25
 buf.percentile(90)   # => 90.1
 ```
 
+### Moving Averages
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(5)
+[1, 2, 3, 4, 5].each { |v| buf.push(v) }
+
+buf.moving_average(window: 3)  # => [2.0, 3.0, 4.0]
+buf.ema(alpha: 0.5)            # => 4.0625
+```
+
 ### Random Sampling
 
 ```ruby
@@ -186,6 +196,8 @@ buf.select(&:odd?)        # => [1, 3]
 | `#variance` | Population variance |
 | `#stddev` | Population standard deviation |
 | `#median` | Median value |
+| `#moving_average(window:)` | Sliding window averages (oldest to newest) |
+| `#ema(alpha:)` | Exponential moving average (single float) |
 
 ## Development
 

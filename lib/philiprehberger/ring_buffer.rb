@@ -299,7 +299,7 @@ module Philiprehberger
       arr = to_a
       arr.each { |v| raise Error, 'all elements must be numeric' unless v.is_a?(Numeric) }
 
-      (0..arr.length - window).map do |i|
+      (0..(arr.length - window)).map do |i|
         arr[i, window].sum.to_f / window
       end
     end
@@ -310,14 +310,14 @@ module Philiprehberger
     # @return [Float]
     def ema(alpha:)
       raise Error, 'buffer is empty' if empty?
-      raise Error, 'alpha must be between 0 (exclusive) and 1 (inclusive)' unless alpha.is_a?(Numeric) && alpha > 0 && alpha <= 1
+      raise Error, 'alpha must be between 0 (exclusive) and 1 (inclusive)' unless alpha.is_a?(Numeric) && alpha.positive? && alpha <= 1
 
       arr = to_a
       arr.each { |v| raise Error, 'all elements must be numeric' unless v.is_a?(Numeric) }
 
       result = arr.first.to_f
       arr.drop(1).each do |v|
-        result = alpha * v + (1 - alpha) * result
+        result = (alpha * v) + ((1 - alpha) * result)
       end
       result
     end

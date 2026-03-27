@@ -3,6 +3,7 @@
 [![Tests](https://github.com/philiprehberger/rb-ring-buffer/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/rb-ring-buffer/actions/workflows/ci.yml)
 [![Gem Version](https://badge.fury.io/rb/philiprehberger-ring_buffer.svg)](https://rubygems.org/gems/philiprehberger-ring_buffer)
 [![License](https://img.shields.io/github/license/philiprehberger/rb-ring-buffer)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Fixed-size circular buffer with overflow, statistics, and enumeration
 
@@ -93,4 +94,4 @@ bundle exec rubocop
 
 ## License
 
-MIT
+[MIT](LICENSE)

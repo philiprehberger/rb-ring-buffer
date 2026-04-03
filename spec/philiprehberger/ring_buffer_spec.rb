@@ -182,6 +182,200 @@ RSpec.describe Philiprehberger::RingBuffer do
     end
   end
 
+  describe '#[]' do
+    it 'accesses elements by positive index (0 = oldest)' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf[0]).to eq(10)
+      expect(buf[1]).to eq(20)
+      expect(buf[2]).to eq(30)
+    end
+
+    it 'accesses elements by negative index (-1 = newest)' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf[-1]).to eq(30)
+      expect(buf[-2]).to eq(20)
+      expect(buf[-3]).to eq(10)
+    end
+
+    it 'returns nil for out-of-bounds positive index' do
+      buf = described_class.new(5)
+      [10, 20].each { |v| buf.push(v) }
+      expect(buf[5]).to be_nil
+    end
+
+    it 'returns nil for out-of-bounds negative index' do
+      buf = described_class.new(5)
+      [10, 20].each { |v| buf.push(v) }
+      expect(buf[-3]).to be_nil
+    end
+
+    it 'returns nil for empty buffer' do
+      expect(described_class.new(3)[0]).to be_nil
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf[0]).to eq(3)
+      expect(buf[-1]).to eq(5)
+    end
+  end
+
+  describe '#first' do
+    it 'returns single oldest element when n=1' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf.first).to eq(10)
+    end
+
+    it 'returns array of oldest n elements when n>1' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect(buf.first(2)).to eq([10, 20])
+    end
+
+    it 'returns nil for empty buffer with default n' do
+      expect(described_class.new(3).first).to be_nil
+    end
+
+    it 'returns empty array for empty buffer with n>1' do
+      expect(described_class.new(3).first(2)).to eq([])
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf.first).to eq(3)
+      expect(buf.first(2)).to eq([3, 4])
+    end
+  end
+
+  describe '#clear' do
+    it 'removes all elements' do
+      buf = described_class.new(5)
+      [1, 2, 3].each { |v| buf.push(v) }
+      buf.clear
+      expect(buf.to_a).to eq([])
+      expect(buf.size).to eq(0)
+      expect(buf.empty?).to be true
+    end
+
+    it 'preserves capacity' do
+      buf = described_class.new(5)
+      [1, 2, 3].each { |v| buf.push(v) }
+      buf.clear
+      expect(buf.capacity).to eq(5)
+    end
+
+    it 'returns self for chaining' do
+      buf = described_class.new(3)
+      expect(buf.clear).to be(buf)
+    end
+
+    it 'allows reuse after clearing' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4].each { |v| buf.push(v) }
+      buf.clear
+      buf.push(10)
+      buf.push(20)
+      expect(buf.to_a).to eq([10, 20])
+      expect(buf.size).to eq(2)
+    end
+
+    it 'resets internal head pointer' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      buf.clear
+      buf.push(100)
+      expect(buf.to_a).to eq([100])
+      expect(buf[0]).to eq(100)
+    end
+  end
+
+  describe '#variance' do
+    it 'calculates population variance' do
+      buf = described_class.new(5)
+      [2, 4, 4, 4, 5, 5, 7, 9].last(5).each { |v| buf.push(v) }
+      # values: [4, 5, 5, 7, 9], mean = 6.0, variance = (4+1+1+1+9)/5 = 3.2
+      expect(buf.variance).to be_within(0.0001).of(3.2)
+    end
+
+    it 'returns 0.0 for empty buffer' do
+      expect(described_class.new(3).variance).to eq(0.0)
+    end
+
+    it 'returns 0.0 for single element' do
+      buf = described_class.new(5)
+      buf.push(42)
+      expect(buf.variance).to eq(0.0)
+    end
+
+    it 'returns 0.0 when all elements are equal' do
+      buf = described_class.new(5)
+      [3, 3, 3].each { |v| buf.push(v) }
+      expect(buf.variance).to eq(0.0)
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      # values: [3, 4, 5], mean = 4.0, variance = (1+0+1)/3
+      expect(buf.variance).to be_within(0.0001).of(0.6667)
+    end
+  end
+
+  describe '#stddev' do
+    it 'calculates population standard deviation' do
+      buf = described_class.new(5)
+      [2, 4, 4, 4, 5].each { |v| buf.push(v) }
+      expected_var = buf.variance
+      expect(buf.stddev).to be_within(0.0001).of(Math.sqrt(expected_var))
+    end
+
+    it 'returns 0.0 for empty buffer' do
+      expect(described_class.new(3).stddev).to eq(0.0)
+    end
+
+    it 'returns 0.0 for single element' do
+      buf = described_class.new(5)
+      buf.push(42)
+      expect(buf.stddev).to eq(0.0)
+    end
+  end
+
+  describe '#median' do
+    it 'returns median for odd count' do
+      buf = described_class.new(5)
+      [3, 1, 2].each { |v| buf.push(v) }
+      expect(buf.median).to eq(2.0)
+    end
+
+    it 'returns median for even count' do
+      buf = described_class.new(5)
+      [3, 1, 2, 4].each { |v| buf.push(v) }
+      expect(buf.median).to eq(2.5)
+    end
+
+    it 'returns nil for empty buffer' do
+      expect(described_class.new(3).median).to be_nil
+    end
+
+    it 'returns value for single element' do
+      buf = described_class.new(5)
+      buf.push(42)
+      expect(buf.median).to eq(42.0)
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      # values: [3, 4, 5], median = 4.0
+      expect(buf.median).to eq(4.0)
+    end
+  end
+
   describe 'Enumerable' do
     it 'supports map' do
       buf = described_class.new(5)

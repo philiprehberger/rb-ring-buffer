@@ -38,24 +38,51 @@ buf.to_a          # => [2, 3, 4]
 buf.full?         # => true
 ```
 
+### Index Access
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(5)
+[10, 20, 30].each { |v| buf.push(v) }
+
+buf[0]   # => 10 (oldest)
+buf[-1]  # => 30 (newest)
+buf[99]  # => nil (out of bounds)
+```
+
+### First / Last Elements
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(10)
+(1..10).each { |v| buf.push(v) }
+
+buf.first      # => 1
+buf.first(3)   # => [1, 2, 3]
+buf.last(3)    # => [8, 9, 10]
+```
+
+### Clear
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(5)
+[1, 2, 3].each { |v| buf.push(v) }
+buf.clear
+buf.size   # => 0
+buf.empty? # => true
+```
+
 ### Statistics
 
 ```ruby
 buf = Philiprehberger::RingBuffer.new(100)
 [10, 20, 30].each { |v| buf.push(v) }
 
-buf.average  # => 20.0
-buf.sum      # => 60
-buf.min      # => 10
-buf.max      # => 30
-```
-
-### Last N Elements
-
-```ruby
-buf = Philiprehberger::RingBuffer.new(10)
-(1..10).each { |v| buf.push(v) }
-buf.last(3)  # => [8, 9, 10]
+buf.average   # => 20.0
+buf.sum       # => 60
+buf.min       # => 10
+buf.max       # => 30
+buf.variance  # => 66.66666666666667
+buf.stddev    # => 8.16496580927726
+buf.median    # => 20.0
 ```
 
 ### Enumerable
@@ -73,15 +100,21 @@ buf.select(&:odd?)        # => [1, 3]
 |--------|-------------|
 | `RingBuffer.new(capacity)` | Create a buffer with fixed capacity |
 | `#push(value)` | Add a value, overwriting oldest if full |
+| `#[](index)` | Access by index (0 = oldest, -1 = newest) |
 | `#to_a` | Convert to array (oldest first) |
 | `#size` | Number of elements in the buffer |
 | `#full?` | Whether the buffer is at capacity |
 | `#empty?` | Whether the buffer has no elements |
+| `#first(n)` | First n elements (oldest) |
+| `#last(n)` | Last n elements (most recent) |
+| `#clear` | Remove all elements, reset state |
 | `#average` | Average of numeric elements |
 | `#sum` | Sum of numeric elements |
 | `#min` | Minimum element |
 | `#max` | Maximum element |
-| `#last(n)` | Last n elements (most recent) |
+| `#variance` | Population variance |
+| `#stddev` | Population standard deviation |
+| `#median` | Median value |
 
 ## Development
 

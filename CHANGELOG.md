@@ -7,6 +7,14 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-03
+
+### Added
+- Index-based access via `[]` with positive and negative indices
+- `first` method for accessing oldest elements
+- `clear` method to reset buffer state
+- Statistical methods: `variance`, `stddev`, `median`
+
 ## [0.1.6] - 2026-03-31
 
 ### Added

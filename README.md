@@ -117,6 +117,36 @@ buf.resize(2)
 buf.to_a         # => [2, 3] (keeps most recent)
 ```
 
+### Batch Push
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(5)
+buf.concat(1, 2, 3, 4, 5)
+buf.to_a  # => [1, 2, 3, 4, 5]
+```
+
+### Percentile
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(100)
+(1..100).each { |v| buf.push(v) }
+
+buf.percentile(25)   # => 25.75
+buf.percentile(50)   # => 50.5
+buf.percentile(75)   # => 75.25
+buf.percentile(90)   # => 90.1
+```
+
+### Random Sampling
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(5)
+[10, 20, 30, 40, 50].each { |v| buf.push(v) }
+
+buf.sample       # => random element
+buf.sample(2)    # => [random, random]
+```
+
 ### Enumerable
 
 ```ruby
@@ -144,7 +174,10 @@ buf.select(&:odd?)        # => [1, 3]
 | `#first(n)` | First n elements (oldest) |
 | `#last(n)` | Last n elements (most recent) |
 | `#clear` | Remove all elements, reset state |
+| `#concat(*values)` | Push multiple values at once |
 | `#resize(new_capacity)` | Change buffer capacity, keeping most recent elements |
+| `#percentile(p)` | Calculate the p-th percentile (0-100) with interpolation |
+| `#sample(n)` | Random element (or array of n random elements) |
 | `#inspect` | Human-readable string representation |
 | `#average` | Average of numeric elements |
 | `#sum` | Sum of numeric elements |

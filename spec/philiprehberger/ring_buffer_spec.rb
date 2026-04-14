@@ -544,6 +544,117 @@ RSpec.describe Philiprehberger::RingBuffer do
     end
   end
 
+  describe '#concat' do
+    it 'pushes multiple values at once' do
+      buf = described_class.new(5)
+      buf.concat(1, 2, 3)
+      expect(buf.to_a).to eq([1, 2, 3])
+      expect(buf.size).to eq(3)
+    end
+
+    it 'overwrites oldest when exceeding capacity' do
+      buf = described_class.new(3)
+      buf.concat(1, 2, 3, 4, 5)
+      expect(buf.to_a).to eq([3, 4, 5])
+    end
+
+    it 'returns self for chaining' do
+      buf = described_class.new(5)
+      expect(buf.concat(1, 2)).to be(buf)
+    end
+
+    it 'handles no arguments' do
+      buf = described_class.new(3)
+      buf.concat
+      expect(buf.empty?).to be true
+    end
+  end
+
+  describe '#percentile' do
+    it 'returns nil for empty buffer' do
+      expect(described_class.new(3).percentile(50)).to be_nil
+    end
+
+    it 'returns the value for single element' do
+      buf = described_class.new(5)
+      buf.push(42)
+      expect(buf.percentile(50)).to eq(42.0)
+    end
+
+    it 'returns min at 0th percentile' do
+      buf = described_class.new(5)
+      [10, 20, 30, 40, 50].each { |v| buf.push(v) }
+      expect(buf.percentile(0)).to eq(10.0)
+    end
+
+    it 'returns max at 100th percentile' do
+      buf = described_class.new(5)
+      [10, 20, 30, 40, 50].each { |v| buf.push(v) }
+      expect(buf.percentile(100)).to eq(50.0)
+    end
+
+    it 'calculates 25th percentile' do
+      buf = described_class.new(5)
+      [10, 20, 30, 40, 50].each { |v| buf.push(v) }
+      expect(buf.percentile(25)).to eq(20.0)
+    end
+
+    it 'calculates 50th percentile matching median' do
+      buf = described_class.new(5)
+      [10, 20, 30, 40, 50].each { |v| buf.push(v) }
+      expect(buf.percentile(50)).to eq(buf.median)
+    end
+
+    it 'interpolates between values' do
+      buf = described_class.new(4)
+      [10, 20, 30, 40].each { |v| buf.push(v) }
+      # rank = 0.75 * 3 = 2.25 => 30 + (40-30)*0.25 = 32.5
+      expect(buf.percentile(75)).to eq(32.5)
+    end
+
+    it 'raises for percentile below 0' do
+      buf = described_class.new(3)
+      buf.push(1)
+      expect { buf.percentile(-1) }.to raise_error(described_class::Error)
+    end
+
+    it 'raises for percentile above 100' do
+      buf = described_class.new(3)
+      buf.push(1)
+      expect { buf.percentile(101) }.to raise_error(described_class::Error)
+    end
+
+    it 'works after wrap-around' do
+      buf = described_class.new(3)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf.percentile(50)).to eq(4.0)
+    end
+  end
+
+  describe '#sample' do
+    it 'returns nil for empty buffer' do
+      expect(described_class.new(3).sample).to be_nil
+    end
+
+    it 'returns empty array for empty buffer with n' do
+      expect(described_class.new(3).sample(2)).to eq([])
+    end
+
+    it 'returns an element from the buffer' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      expect([10, 20, 30]).to include(buf.sample)
+    end
+
+    it 'returns n elements when given an argument' do
+      buf = described_class.new(5)
+      [10, 20, 30].each { |v| buf.push(v) }
+      result = buf.sample(2)
+      expect(result.length).to eq(2)
+      result.each { |v| expect([10, 20, 30]).to include(v) }
+    end
+  end
+
   describe 'mixed mutation' do
     it 'keeps to_a consistent across push/shift/pop sequences' do
       buf = described_class.new(4)

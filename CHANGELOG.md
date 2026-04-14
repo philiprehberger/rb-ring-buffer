@@ -7,6 +7,16 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-14
+
+### Added
+- `#resize(new_capacity)` to dynamically change buffer capacity while preserving elements
+- `#inspect` for human-readable string representation
+
+### Fixed
+- Bug report template: Ruby version now required, gem version field added
+- Feature request template: added "Alternatives considered" field and API placeholder
+
 ## [0.3.0] - 2026-04-09
 
 ### Added
@@ -68,6 +78,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Last-n element retrieval
 - Enumerable support
 
+[0.4.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.4.0
 [0.3.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.3.0
 [0.2.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.2.0
 [0.1.6]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.1.6

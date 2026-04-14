@@ -221,6 +221,36 @@ module Philiprehberger
       end
     end
 
+    # Change the buffer capacity, preserving elements
+    #
+    # If the new capacity is smaller than the current element count,
+    # the oldest elements are discarded and only the most recent
+    # new_capacity elements are kept.
+    #
+    # @param new_capacity [Integer] the new maximum number of elements
+    # @return [self]
+    def resize(new_capacity)
+      raise Error, 'capacity must be a positive integer' unless new_capacity.is_a?(Integer) && new_capacity.positive?
+      return self if new_capacity == @capacity
+
+      elements = to_a
+      elements = elements.last(new_capacity) if elements.length > new_capacity
+
+      @capacity = new_capacity
+      @buffer = Array.new(new_capacity)
+      @head = 0
+      @count = 0
+      elements.each { |e| push(e) }
+      self
+    end
+
+    # Human-readable string representation
+    #
+    # @return [String]
+    def inspect
+      "#<#{self.class} capacity=#{@capacity} size=#{@count} elements=#{to_a.inspect}>"
+    end
+
     # Iterate over elements (oldest first)
     #
     # @yield [element]

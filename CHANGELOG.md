@@ -7,6 +7,12 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-04-21
+
+### Added
+- `RingBuffer#range` — spread between min and max
+- `RingBuffer#count_by` — bucketed counts by block return value
+
 ## [0.6.0] - 2026-04-15
 
 ### Added
@@ -91,6 +97,7 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Last-n element retrieval
 - Enumerable support
 
+[0.7.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.7.0
 [0.6.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.6.0
 [0.5.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.5.0
 [0.4.0]: https://github.com/philiprehberger/rb-ring-buffer/releases/tag/v0.4.0

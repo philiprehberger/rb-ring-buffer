@@ -784,6 +784,42 @@ RSpec.describe Philiprehberger::RingBuffer do
     end
   end
 
+  describe '#range' do
+    it 'returns the spread between min and max' do
+      buf = described_class.new(5)
+      [3, 1, 9, 4].each { |v| buf.push(v) }
+      expect(buf.range).to eq(8)
+    end
+
+    it 'returns 0 for a single-element buffer' do
+      buf = described_class.new(5)
+      buf.push(42)
+      expect(buf.range).to eq(0)
+    end
+
+    it 'raises for empty buffer' do
+      expect { described_class.new(3).range }.to raise_error(described_class::Error)
+    end
+  end
+
+  describe '#count_by' do
+    it 'buckets elements by the block return value' do
+      buf = described_class.new(10)
+      [1, 2, 3, 4, 5, 6].each { |v| buf.push(v) }
+      expect(buf.count_by(&:even?)).to eq({ true => 3, false => 3 })
+    end
+
+    it 'returns an empty hash for an empty buffer' do
+      expect(described_class.new(3).count_by { |v| v }).to eq({})
+    end
+
+    it 'returns an Enumerator when called without a block' do
+      buf = described_class.new(5)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect(buf.count_by).to be_a(Enumerator)
+    end
+  end
+
   describe 'mixed mutation' do
     it 'keeps to_a consistent across push/shift/pop sequences' do
       buf = described_class.new(4)

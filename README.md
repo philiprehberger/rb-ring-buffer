@@ -147,6 +147,16 @@ buf.moving_average(window: 3)  # => [2.0, 3.0, 4.0]
 buf.ema(alpha: 0.5)            # => 4.0625
 ```
 
+### Descriptive Helpers
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(10)
+[1, 2, 3, 4, 5, 6].each { |v| buf.push(v) }
+
+buf.range                  # => 5 (max - min)
+buf.count_by(&:even?)      # => { false => 3, true => 3 }
+```
+
 ### Random Sampling
 
 ```ruby
@@ -198,6 +208,8 @@ buf.select(&:odd?)        # => [1, 3]
 | `#median` | Median value |
 | `#moving_average(window:)` | Sliding window averages (oldest to newest) |
 | `#ema(alpha:)` | Exponential moving average (single float) |
+| `#range` | Spread between min and max numeric elements |
+| `#count_by(&block)` | Bucketed counts by block return value |
 
 ## Development
 

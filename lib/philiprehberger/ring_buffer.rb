@@ -335,5 +335,31 @@ module Philiprehberger
     def each(&)
       to_a.each(&)
     end
+
+    # Spread between the minimum and maximum numeric elements
+    #
+    # @return [Numeric] the difference between max and min
+    # @raise [Error] if the buffer is empty
+    def range
+      raise Error, 'buffer is empty' if empty?
+
+      max - min
+    end
+
+    # Bucket elements by the block's return value and count each bucket
+    #
+    # Iterates oldest-to-newest via {#each}. An empty buffer returns `{}`.
+    #
+    # @yield [element] block whose return value is used as the bucket key
+    # @yieldparam element [Object] each element in oldest-to-newest order
+    # @return [Hash{Object => Integer}] bucket key to count mapping
+    # @return [Enumerator] if no block is given
+    def count_by(&block)
+      return enum_for(:count_by) unless block
+
+      result = Hash.new(0)
+      each { |element| result[block.call(element)] += 1 }
+      result
+    end
   end
 end

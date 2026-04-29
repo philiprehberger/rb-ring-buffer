@@ -7,6 +7,11 @@ and this gem adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-28
+
+### Added
+- `RingBuffer#each_chunk(size)` — yield successive non-overlapping chunks of `size` elements (oldest first). Returns an Enumerator without a block. Raises `Error` for non-positive sizes.
+
 ## [0.7.0] - 2026-04-21
 
 ### Added

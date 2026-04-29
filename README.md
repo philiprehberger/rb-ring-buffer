@@ -167,6 +167,22 @@ buf.sample       # => random element
 buf.sample(2)    # => [random, random]
 ```
 
+### Chunked Iteration
+
+Yield successive non-overlapping chunks of fixed size in oldest-first order.
+The final chunk may be shorter:
+
+```ruby
+buf = Philiprehberger::RingBuffer.new(10)
+(1..7).each { |v| buf.push(v) }
+
+buf.each_chunk(2).to_a   # => [[1, 2], [3, 4], [5, 6], [7]]
+
+buf.each_chunk(3) do |chunk|
+  process_batch(chunk)
+end
+```
+
 ### Enumerable
 
 ```ruby
@@ -210,6 +226,7 @@ buf.select(&:odd?)        # => [1, 3]
 | `#ema(alpha:)` | Exponential moving average (single float) |
 | `#range` | Spread between min and max numeric elements |
 | `#count_by(&block)` | Bucketed counts by block return value |
+| `#each_chunk(size)` | Yield successive non-overlapping chunks of `size` elements (oldest first) |
 
 ## Development
 

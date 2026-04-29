@@ -820,6 +820,57 @@ RSpec.describe Philiprehberger::RingBuffer do
     end
   end
 
+  describe '#each_chunk' do
+    it 'yields non-overlapping chunks (oldest first)' do
+      buf = described_class.new(10)
+      [1, 2, 3, 4, 5, 6].each { |v| buf.push(v) }
+      expect(buf.each_chunk(2).to_a).to eq([[1, 2], [3, 4], [5, 6]])
+    end
+
+    it 'yields a final short chunk when length is not a multiple of size' do
+      buf = described_class.new(10)
+      [1, 2, 3, 4, 5].each { |v| buf.push(v) }
+      expect(buf.each_chunk(2).to_a).to eq([[1, 2], [3, 4], [5]])
+    end
+
+    it 'supports a chunk size of 1' do
+      buf = described_class.new(5)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect(buf.each_chunk(1).to_a).to eq([[1], [2], [3]])
+    end
+
+    it 'yields a single short chunk when size exceeds buffer length' do
+      buf = described_class.new(5)
+      [1, 2].each { |v| buf.push(v) }
+      expect(buf.each_chunk(10).to_a).to eq([[1, 2]])
+    end
+
+    it 'yields nothing for an empty buffer' do
+      expect(described_class.new(5).each_chunk(2).to_a).to eq([])
+    end
+
+    it 'iterates with a block' do
+      buf = described_class.new(10)
+      [1, 2, 3, 4].each { |v| buf.push(v) }
+      collected = []
+      buf.each_chunk(2) { |c| collected << c }
+      expect(collected).to eq([[1, 2], [3, 4]])
+    end
+
+    it 'returns an Enumerator when no block is given' do
+      buf = described_class.new(5)
+      [1, 2, 3].each { |v| buf.push(v) }
+      expect(buf.each_chunk(2)).to be_a(Enumerator)
+    end
+
+    it 'raises for non-positive size' do
+      buf = described_class.new(5)
+      buf.push(1)
+      expect { buf.each_chunk(0) }.to raise_error(Philiprehberger::RingBuffer::Error)
+      expect { buf.each_chunk(-1) }.to raise_error(Philiprehberger::RingBuffer::Error)
+    end
+  end
+
   describe 'mixed mutation' do
     it 'keeps to_a consistent across push/shift/pop sequences' do
       buf = described_class.new(4)

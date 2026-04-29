@@ -361,5 +361,22 @@ module Philiprehberger
       each { |element| result[block.call(element)] += 1 }
       result
     end
+
+    # Yield successive non-overlapping chunks of `size` elements (oldest first)
+    #
+    # The final chunk may be shorter than `size` if the buffer length is not
+    # a multiple of `size`. An empty buffer yields nothing.
+    #
+    # @param size [Integer] chunk size (must be positive)
+    # @yield [chunk] each chunk in oldest-to-newest order
+    # @yieldparam chunk [Array] up to `size` elements
+    # @return [Enumerator] when no block is given
+    # @raise [Error] when `size` is not a positive integer
+    def each_chunk(size, &block)
+      raise Error, 'size must be a positive integer' unless size.is_a?(Integer) && size.positive?
+      return enum_for(:each_chunk, size) unless block
+
+      to_a.each_slice(size, &block)
+    end
   end
 end
